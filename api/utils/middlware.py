@@ -1,5 +1,4 @@
 import jwt
-from jwt.exceptions import PyJWTError
 from fastapi import HTTPException, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from api.utils.config import SECRET_KEY
