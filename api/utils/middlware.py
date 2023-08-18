@@ -1,5 +1,4 @@
 import jwt
-from jwt.exceptions import PyJWTError
 from fastapi import HTTPException, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from api.utils.config import SECRET_KEY
@@ -17,8 +16,8 @@ async def access_route(credentials: HTTPAuthorizationCredentials= Depends(securi
             }
         )
         print("payload => ", payload)
-    except PyJWTError as e:
+    except:
         raise HTTPException(
             status_code=401,
-            detail=str(e))
+            detail=str("Invlid token or token not found!"))
         
