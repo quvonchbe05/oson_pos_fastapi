@@ -31,3 +31,4 @@ pyjwt
 python-jose
 passlib
 bcrypt
+PyJWT
