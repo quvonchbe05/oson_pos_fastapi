@@ -17,8 +17,8 @@ async def access_route(credentials: HTTPAuthorizationCredentials= Depends(securi
             }
         )
         print("payload => ", payload)
-    except PyJWTError as e:
+    except:
         raise HTTPException(
             status_code=401,
-            detail=str(e))
+            detail=str("Invlid token or token not found!"))
         
