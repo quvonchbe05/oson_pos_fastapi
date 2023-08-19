@@ -25,10 +25,7 @@ sqlalchemy
 psycopg2-binary
 sqlalchemy-utils
 python-dotenv
-jwt
 asyncpg
-pyjwt
 python-jose
 passlib
 bcrypt
-PyJWT

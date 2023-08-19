@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
-import jwt
 from api.models.models import User
-from api.utils.config import SECRET_KEY
+from api.db.config import SECRET_KEY
 from sqlalchemy import select
 from api.db.db import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,17 +18,12 @@ async def login(username: str, password: str, session: AsyncSession = Depends(ge
     stmt = select(User).where(User.username == username)
     user = await session.scalar(stmt)
     if user and pbkdf2_sha256.verify(password, user.password):
-        token = jwt.encode(
-            {
+        return {
                 "id": str(user.id),
                 "name": user.name,
                 "username": user.username,
                 "email": user.email,
                 "is_admin": user.is_admin,
-            }, 
-            SECRET_KEY, 
-            algorithm="HS256"
-        )
-        return {"token": token}
+            }
     else:
         raise HTTPException(status_code=401, detail="Incorrect username or password.")
