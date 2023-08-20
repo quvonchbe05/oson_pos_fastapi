@@ -7,12 +7,14 @@ from api.models.models import Basket, Product, Saled
 
 
 router = APIRouter(
-    prefix='/basket',
-    tags=['Basket',]
+    prefix="/basket",
+    tags=[
+        "Basket",
+    ],
 )
 
 
-@router.get('/list/{user_id}')
+@router.get("/list/{user_id}")
 async def basket_list(user_id: str, session: AsyncSession = Depends(get_async_session)):
     stmt = select(Basket).where(Basket.user == user_id)
     products = await session.scalars(stmt)
@@ -20,30 +22,32 @@ async def basket_list(user_id: str, session: AsyncSession = Depends(get_async_se
     return response
 
 
-
-@router.post('/create')
-async def basket_create(new_basket: BasketCreateSchema, session: AsyncSession = Depends(get_async_session)):
+@router.post("/create")
+async def basket_create(
+    new_basket: BasketCreateSchema, session: AsyncSession = Depends(get_async_session)
+):
     stmt = insert(Basket).values(
         name=new_basket.name,
         count=new_basket.count,
         price=new_basket.price,
-        total_price=str(int(new_basket.count)*int(new_basket.price)),
+        total_price=str(int(new_basket.count) * int(new_basket.price)),
         user=new_basket.user,
     )
     await session.execute(stmt)
     await session.commit()
-    return "success"
+    return {"status": {"status": "success"}}
 
 
-
-@router.post('/sale/{user_id}')
+@router.post("/sale/{user_id}")
 async def basket_sale(user_id: str, session: AsyncSession = Depends(get_async_session)):
     basket_query = select(Basket).where(Basket.user == user_id)
     basket = await session.scalars(basket_query)
     for b in basket:
-        product = update(Product).values(
-            amount=Product.amount-int(b.count)
-        ).where(Product.id == b.name)
+        product = (
+            update(Product)
+            .values(amount=Product.amount - int(b.count))
+            .where(Product.id == b.name)
+        )
         await session.execute(product)
         await session.commit()
         product_query = select(Product).where(Product.id == b.name)
@@ -53,26 +57,31 @@ async def basket_sale(user_id: str, session: AsyncSession = Depends(get_async_se
             count=b.count,
             price=b.price,
             total_price=b.total_price,
-            user=b.user
+            user=b.user,
         )
         await session.execute(save_to_saled)
         await session.commit()
         basket2 = delete(Basket).where(Basket.id == b.id)
         await session.execute(basket2)
         await session.commit()
-    return "success"
+    return {"status": "success"}
 
 
-@router.delete('/delete/{user_id}/{product_id}')
-async def basket_delete(user_id: str,product_id:int, session: AsyncSession = Depends(get_async_session)):
-    stmt = delete(Basket).where(Basket.user == user_id, Basket.id==product_id)
+@router.delete("/delete/{user_id}/{product_id}")
+async def basket_delete(
+    user_id: str, product_id: int, session: AsyncSession = Depends(get_async_session)
+):
+    stmt = delete(Basket).where(Basket.user == user_id, Basket.id == product_id)
     await session.execute(stmt)
     await session.commit()
-    return "success"
+    return {"status": "success"}
 
-@router.delete('/refresh/{user_id}')
-async def basket_refresh(user_id: str, session: AsyncSession = Depends(get_async_session)):
+
+@router.delete("/refresh/{user_id}")
+async def basket_refresh(
+    user_id: str, session: AsyncSession = Depends(get_async_session)
+):
     stmt = delete(Basket).where(Basket.user == user_id)
     await session.execute(stmt)
     await session.commit()
-    return "success"
+    return {"status": "success"}

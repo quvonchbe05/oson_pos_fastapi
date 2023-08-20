@@ -7,11 +7,14 @@ from api.schemas.products import ProductSchema
 
 
 router = APIRouter(
-    prefix='/products',
-    tags=["Products", ]
+    prefix="/products",
+    tags=[
+        "Products",
+    ],
 )
 
-@router.get('/list')
+
+@router.get("/list")
 async def product_list(session: AsyncSession = Depends(get_async_session)):
     stmt = select(Product)
     products = await session.scalars(stmt)
@@ -22,8 +25,10 @@ async def product_list(session: AsyncSession = Depends(get_async_session)):
     return response
 
 
-@router.get('/detail/{product_id}')
-async def product_detail(product_id: int, session: AsyncSession = Depends(get_async_session)):
+@router.get("/detail/{product_id}")
+async def product_detail(
+    product_id: int, session: AsyncSession = Depends(get_async_session)
+):
     stmt = select(Product).where(Product.id == product_id)
     product = await session.scalar(stmt)
     category_stmt = select(Category).where(Category.id == product.category_id)
@@ -31,8 +36,10 @@ async def product_detail(product_id: int, session: AsyncSession = Depends(get_as
     return product
 
 
-@router.post('/create')
-async def product_create(new_product: ProductSchema, session: AsyncSession = Depends(get_async_session)):
+@router.post("/create")
+async def product_create(
+    new_product: ProductSchema, session: AsyncSession = Depends(get_async_session)
+):
     stmt = insert(Product).values(
         name=new_product.name,
         amount=new_product.amount,
@@ -43,27 +50,37 @@ async def product_create(new_product: ProductSchema, session: AsyncSession = Dep
     )
     await session.execute(stmt)
     await session.commit()
-    return "success"
+    return {"status": "success"}
 
 
-@router.put('/edit/{product_id}')
-async def product_create(product_id: int, new_product: ProductSchema, session: AsyncSession = Depends(get_async_session)):
-    stmt = update(Product).values(
-        name=new_product.name,
-        amount=new_product.amount,
-        price=new_product.price,
-        sale_price=new_product.sale_price,
-        bar_code=new_product.bar_code,
-        category_id=new_product.category_id,
-    ).where(Product.id == product_id)
+@router.put("/edit/{product_id}")
+async def product_create(
+    product_id: int,
+    new_product: ProductSchema,
+    session: AsyncSession = Depends(get_async_session),
+):
+    stmt = (
+        update(Product)
+        .values(
+            name=new_product.name,
+            amount=new_product.amount,
+            price=new_product.price,
+            sale_price=new_product.sale_price,
+            bar_code=new_product.bar_code,
+            category_id=new_product.category_id,
+        )
+        .where(Product.id == product_id)
+    )
     await session.execute(stmt)
     await session.commit()
-    return "success"
+    return {"status": "success"}
 
 
-@router.delete('/delete/{product_id}')
-async def product_delete(product_id: int, session: AsyncSession = Depends(get_async_session)):
+@router.delete("/delete/{product_id}")
+async def product_delete(
+    product_id: int, session: AsyncSession = Depends(get_async_session)
+):
     stmt = delete(Product).where(Product.id == product_id)
     await session.execute(stmt)
     await session.commit()
-    return "success"
+    return {"status": "success"}
